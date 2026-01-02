@@ -1,14 +1,60 @@
-<script>
-function getDateTime() {
-  const now = new Date();
-  const date = now.toLocaleDateString("ar-IQ");
-  const time = now.toLocaleTimeString("ar-IQ", {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-  return { date, time };
-}
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>زيارة الزبون</title>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body {
+  font-family: Arial;
+  direction: rtl;
+  background: #f2f2f2;
+  padding: 20px;
+}
+.container {
+  background: #fff;
+  padding: 20px;
+  max-width: 500px;
+  margin: auto;
+  border-radius: 10px;
+}
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+}
+button {
+  background: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>نموذج زيارة الزبون</h2>
+
+  <input type="text" id="phone" placeholder="رقم هاتف الزبون">
+  <input type="text" id="location" placeholder="موقع الزبون">
+
+  <select id="reason">
+    <option value="">سبب الزيارة</option>
+    <option>استحصال</option>
+    <option>بيع</option>
+    <option>عرض منتج</option>
+  </select>
+
+  <input type="file" id="image" accept="image/*">
+
+  <button onclick="savePDF()">حفظ الزيارة PDF</button>
+</div>
+
+<script>
 async function savePDF() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF();
@@ -18,20 +64,16 @@ async function savePDF() {
   let reason = document.getElementById("reason").value;
   let imageFile = document.getElementById("image").files[0];
 
-  const dt = getDateTime();
-
   pdf.setFontSize(14);
   pdf.text("زيارة الزبون", 150, 20, {align:"right"});
-  pdf.text("التاريخ: " + dt.date, 150, 35, {align:"right"});
-  pdf.text("الوقت: " + dt.time, 150, 45, {align:"right"});
-  pdf.text("رقم الهاتف: " + phone, 150, 60, {align:"right"});
-  pdf.text("موقع الزبون: " + location, 150, 75, {align:"right"});
-  pdf.text("سبب الزيارة: " + reason, 150, 90, {align:"right"});
+  pdf.text("رقم الهاتف: " + phone, 150, 40, {align:"right"});
+  pdf.text("موقع الزبون: " + location, 150, 55, {align:"right"});
+  pdf.text("سبب الزيارة: " + reason, 150, 70, {align:"right"});
 
   if (imageFile) {
     const reader = new FileReader();
     reader.onload = function(e) {
-      pdf.addImage(e.target.result, "JPEG", 20, 105, 160, 90);
+      pdf.addImage(e.target.result, "JPEG", 20, 85, 160, 90);
       pdf.save("زيارة_زبون.pdf");
     };
     reader.readAsDataURL(imageFile);
@@ -40,3 +82,7 @@ async function savePDF() {
   }
 }
 </script>
+
+</body>
+</html>
+
