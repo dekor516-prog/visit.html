@@ -4,46 +4,59 @@
 <meta charset="UTF-8">
 <title>زيارة الزبون</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
-body {
+body{
   font-family: Arial;
   direction: rtl;
-  background: #f2f2f2;
-  padding: 20px;
+  background:#f2f2f2;
+  padding:20px;
 }
-.container {
-  background: #fff;
-  padding: 20px;
-  max-width: 500px;
-  margin: auto;
-  border-radius: 10px;
+.box{
+  background:white;
+  padding:20px;
+  max-width:500px;
+  margin:auto;
+  border-radius:10px;
 }
-input, select, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
+input, select, button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
 }
-button {
-  background: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
+button{
+  background:#007bff;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+.preview{
+  margin-top:15px;
+  font-size:14px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-  <h2>نموذج زيارة الزبون</h2>
+<div class="box" id="report">
+  <h2>زيارة الزبون</h2>
 
+  <div class="preview" id="datetime"></div>
+
+  <p>رقم الهاتف: <span id="p_phone"></span></p>
+  <p>موقع الزبون: <span id="p_location"></span></p>
+  <p>سبب الزيارة: <span id="p_reason"></span></p>
+
+  <img id="p_image" style="max-width:100%;margin-top:10px;">
+</div>
+
+<div class="box">
   <input type="text" id="phone" placeholder="رقم هاتف الزبون">
   <input type="text" id="location" placeholder="موقع الزبون">
 
   <select id="reason">
-    <option value="">سبب الزيارة</option>
     <option>استحصال</option>
     <option>بيع</option>
     <option>عرض منتج</option>
@@ -51,37 +64,43 @@ button {
 
   <input type="file" id="image" accept="image/*">
 
-  <button onclick="savePDF()">حفظ الزيارة PDF</button>
+  <button onclick="makePDF()">حفظ PDF</button>
 </div>
 
 <script>
-async function savePDF() {
-  const { jsPDF } = window.jspdf;
-  const pdf = new jsPDF();
+function makePDF(){
+  const now = new Date();
+  document.getElementById("datetime").innerText =
+    "التاريخ: " + now.toLocaleDateString("ar-IQ") +
+    " | الوقت: " + now.toLocaleTimeString("ar-IQ",{hour:'2-digit',minute:'2-digit'});
 
-  let phone = document.getElementById("phone").value;
-  let location = document.getElementById("location").value;
-  let reason = document.getElementById("reason").value;
-  let imageFile = document.getElementById("image").files[0];
+  document.getElementById("p_phone").innerText =
+    document.getElementById("phone").value;
 
-  pdf.setFontSize(14);
-  pdf.text("زيارة الزبون", 150, 20, {align:"right"});
-  pdf.text("رقم الهاتف: " + phone, 150, 40, {align:"right"});
-  pdf.text("موقع الزبون: " + location, 150, 55, {align:"right"});
-  pdf.text("سبب الزيارة: " + reason, 150, 70, {align:"right"});
+  document.getElementById("p_location").innerText =
+    document.getElementById("location").value;
 
-  if (imageFile) {
+  document.getElementById("p_reason").innerText =
+    document.getElementById("reason").value;
+
+  const img = document.getElementById("image").files[0];
+  if(img){
     const reader = new FileReader();
-    reader.onload = function(e) {
-      pdf.addImage(e.target.result, "JPEG", 20, 85, 160, 90);
-      pdf.save("زيارة_زبون.pdf");
-    };
-    reader.readAsDataURL(imageFile);
-  } else {
-    pdf.save("زيارة_زبون.pdf");
+    reader.onload = e => document.getElementById("p_image").src = e.target.result;
+    reader.readAsDataURL(img);
   }
+
+  setTimeout(()=>{
+    html2pdf().from(document.getElementById("report"))
+      .set({
+        filename: 'زيارة_زبون.pdf',
+        html2canvas:{scale:2},
+        jsPDF:{orientation:'portrait', unit:'mm', format:'a4'}
+      }).save();
+  },500);
 }
 </script>
 
 </body>
 </html>
+>
